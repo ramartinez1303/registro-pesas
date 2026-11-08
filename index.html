@@ -1,0 +1,855 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1115">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pesas">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAABwklEQVR42u3dsQ2AIBRFUTYwFszlfsaODVgQF6AgGpMPnuQu8H5OR0Ha9ix1S04gOASH4BAcgkNwCA7BITgEhwSH4BAcgkNwCA7BITgEh+CQ4BAcgkNwCA7BITgEh+AQHBIcgkNwCA7BITgEh+AQHIJDcEhwCA7BobVxHFd70FxXnnQjHDbCYSMccMABBxxwwAEHHHDAAQcccMDhcHA4nI1w2AgHHHDAAQccq+EY3A/Hy+PAAQcccMABBxxwwAEHHHDAAQcccMABBxxwwAEHHHDAAQcccMABBxxwwAEHHHDAAQcccMABBxxwRMdxlqrgwSE4BIfgEByCQ3DAAQcccMABBxxwwKE4ODy8eXiDAw444IADDjjggAMOOOCAAw444IADDjjggAMOOOCAAw444IADDjjggAMOOOCAAw444IADDjjg8CFv9umww9kIh41wwAEHHHDAAQcccMABBxxwwAGHw8HhcDbCYSMccMABBxxw/BGHwgaH4BAcgkNwCA7BITgEh+AQHBIcgkNwCA7BITgEh+AQHIJDgkNwCA7BITgEh+AQHIJDcEhwCA7BITgEh+AQHIJDcAgOwSHBITgEhz7tBlxy1SNwviv3AAAAAElFTkSuQmCC">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Registro de pesas</title>
+<style>
+:root {
+  --bg: #0f1115; --panel: #181b22; --panel2: #20242d; --line: #2c313c;
+  --text: #f2f4f8; --muted: #9aa3b2; --accent: #4f9cff; --accent-ink: #06121f;
+  --ok: #3ecf8e; --warn: #ffb547; --bad: #ff6b6b; --info: #8ab4ff;
+  --r: 14px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; background: var(--bg); color: var(--text); }
+body {
+  font: 17px/1.35 -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  padding: env(safe-area-inset-top) 0 calc(76px + env(safe-area-inset-bottom));
+  -webkit-text-size-adjust: 100%;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; border: 0; }
+.wrap { max-width: 560px; margin: 0 auto; padding: 0 12px; }
+h1 { font-size: 22px; margin: 14px 4px 10px; }
+h2 { font-size: 18px; margin: 22px 4px 10px; }
+.muted { color: var(--muted); }
+.small { font-size: 14px; }
+
+/* Selectores de semana y día */
+.selectors { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 10px 0 8px; border-bottom: 1px solid var(--line); }
+.weekrow { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.weekrow label { font-weight: 600; }
+.weekbtn { width: 48px; height: 48px; border-radius: 12px; background: var(--panel2); font-size: 24px; font-weight: 700; }
+.weeksel { flex: 1; height: 48px; border-radius: 12px; background: var(--panel2); border: 1px solid var(--line); padding: 0 12px; font-size: 19px; font-weight: 700; text-align: center; text-align-last: center; appearance: none; -webkit-appearance: none; }
+.days { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.days button { height: 48px; border-radius: 12px; background: var(--panel2); font-weight: 700; font-size: 15px; }
+.days button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.dayinfo { display: flex; justify-content: space-between; margin: 8px 4px 0; font-size: 14px; color: var(--muted); }
+.tag { display: inline-block; padding: 1px 8px; border-radius: 99px; background: var(--panel2); color: var(--info); font-size: 13px; font-weight: 700; margin-left: 6px; }
+
+/* Tarjeta de ejercicio */
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); margin: 12px 0; padding: 14px 12px 12px; }
+.card.done { border-color: #245c45; }
+.card-head { display: flex; gap: 10px; align-items: flex-start; }
+.card-head .n { flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--panel2); display: grid; place-items: center; font-weight: 700; font-size: 14px; color: var(--muted); }
+.card.done .card-head .n { background: var(--ok); color: #05150e; }
+.card-title { flex: 1; min-width: 0; }
+.card-title .name { font-size: 19px; font-weight: 700; line-height: 1.2; }
+.card-title .meta { color: var(--muted); font-size: 15px; margin-top: 3px; }
+.swapped { color: var(--warn); font-size: 13px; font-weight: 600; margin-top: 2px; }
+.last { margin: 10px 0 4px; padding: 8px 10px; background: var(--panel2); border-radius: 10px; font-size: 15px; display: flex; gap: 8px; align-items: center; justify-content: space-between; }
+.last .txt { min-width: 0; }
+.last b { font-weight: 600; }
+.btn { min-height: 44px; padding: 0 14px; white-space: nowrap; border-radius: 12px; background: var(--panel2); font-weight: 600; font-size: 15px; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); }
+.btn.ok { background: var(--ok); color: #05150e; }
+.btn.danger { background: #3a1f24; color: #ffb3b3; }
+.btn.small { min-height: 38px; padding: 0 12px; font-size: 14px; }
+.copy { flex: none; }
+
+.sets { margin-top: 8px; }
+.setrow { display: grid; grid-template-columns: 30px 48px 1fr 48px 74px; gap: 6px; align-items: center; margin: 7px 0; }
+.setrow .lab { color: var(--muted); font-weight: 700; font-size: 15px; text-align: center; }
+.setrow .pm { height: 52px; border-radius: 12px; background: var(--panel2); font-size: 26px; font-weight: 700; }
+.setrow input { width: 100%; height: 52px; border-radius: 12px; border: 1px solid var(--line); background: #0b0d11; text-align: center; font-size: 22px; font-weight: 700; padding: 0 4px; }
+.setrow input::placeholder { color: #4d5462; font-weight: 600; }
+.setrow input:focus { outline: 2px solid var(--accent); border-color: transparent; }
+.colhead { display: grid; grid-template-columns: 30px 48px 1fr 48px 74px; gap: 6px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.colhead span { text-align: center; }
+.colhead .w { grid-column: 2 / 5; }
+.addset { margin-top: 4px; }
+
+.status { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+.pill { padding: 6px 12px; border-radius: 99px; font-weight: 800; font-size: 14px; letter-spacing: .02em; background: var(--panel2); color: var(--muted); }
+.pill.subir { background: #10361f; color: var(--ok); }
+.pill.mas { background: #13284a; color: var(--info); }
+.pill.revisar { background: #3d2a0c; color: var(--warn); }
+.pill.incompleto, .pill.sin { background: var(--panel2); color: var(--muted); }
+.e1rm { font-size: 15px; color: var(--muted); }
+.e1rm b { color: var(--text); }
+
+.actions { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
+.actions .grow { flex: 1; }
+textarea { width: 100%; min-height: 64px; margin-top: 10px; border-radius: 10px; border: 1px solid var(--line); background: #0b0d11; padding: 10px; font-size: 16px; resize: vertical; }
+.summary { margin-top: 8px; font-size: 15px; color: var(--muted); }
+
+/* Barra inferior */
+.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; background: rgba(15,17,21,.96); border-top: 1px solid var(--line); padding: 6px 12px calc(6px + env(safe-area-inset-bottom)); display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.tabs button { height: 54px; border-radius: 12px; background: transparent; color: var(--muted); font-weight: 700; font-size: 16px; }
+.tabs button[aria-pressed="true"] { background: var(--panel2); color: var(--text); }
+.view[hidden] { display: none; }
+
+/* Progreso */
+.prog { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 12px; margin: 10px 0; }
+.prog .name { font-weight: 700; font-size: 17px; }
+.prog .vars { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.prog .row { display: flex; justify-content: space-between; gap: 10px; margin-top: 6px; font-size: 15px; }
+.prog .row span:first-child { color: var(--muted); }
+.prog .big { font-weight: 700; }
+
+/* Yo */
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 12px; margin: 10px 0; }
+.field { display: grid; gap: 4px; margin: 8px 0; }
+.field label { font-size: 14px; color: var(--muted); font-weight: 600; }
+.field input, .field select { height: 48px; border-radius: 10px; border: 1px solid var(--line); background: #0b0d11; padding: 0 12px; font-size: 18px; width: 100%; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.list { margin-top: 8px; }
+.item { display: flex; align-items: center; gap: 8px; padding: 10px 0; border-top: 1px solid var(--line); }
+.item .grow { flex: 1; min-width: 0; }
+.avg { font-size: 26px; font-weight: 800; }
+.empty { color: var(--muted); padding: 8px 0; }
+
+/* Ventana para cambiar ejercicio */
+.overlay { position: fixed; inset: 0; z-index: 20; background: rgba(0,0,0,.6); display: flex; align-items: flex-end; justify-content: center; }
+.overlay[hidden] { display: none; }
+.sheet { background: var(--panel); width: 100%; max-width: 560px; max-height: 88vh; border-radius: 18px 18px 0 0; padding: 14px 12px calc(14px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; }
+.sheet h3 { margin: 4px 4px 10px; font-size: 18px; }
+.sheet .opts { overflow-y: auto; flex: 1; margin: 8px 0; -webkit-overflow-scrolling: touch; }
+.sheet .opt { display: block; width: 100%; text-align: left; padding: 12px; min-height: 48px; border-radius: 10px; background: transparent; border-bottom: 1px solid var(--line); font-size: 16px; }
+.sheet .opt:active { background: var(--panel2); }
+.toast { position: fixed; left: 50%; bottom: calc(90px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: #2b313d; padding: 10px 16px; border-radius: 99px; font-weight: 600; font-size: 15px; z-index: 30; max-width: 90vw; }
+.toast[hidden] { display: none; }
+</style>
+</head>
+<body>
+
+<!-- ============ HOY ============ -->
+<section id="v-hoy" class="view">
+  <div class="selectors">
+    <div class="wrap">
+      <div class="weekrow">
+        <button class="weekbtn" id="wk-prev" aria-label="Semana anterior">‹</button>
+        <select class="weeksel" id="wk-sel" aria-label="Semana del programa"></select>
+        <button class="weekbtn" id="wk-next" aria-label="Semana siguiente">›</button>
+      </div>
+      <div class="days" id="days" role="group" aria-label="Día"></div>
+      <div class="dayinfo"><span id="day-phase"></span><span id="day-progress"></span></div>
+    </div>
+  </div>
+  <div class="wrap" id="hoy-list"></div>
+</section>
+
+<!-- ============ PROGRESO ============ -->
+<section id="v-progreso" class="view" hidden>
+  <div class="wrap">
+    <h1>Progreso</h1>
+    <p class="muted small" style="margin:0 4px">Mejor marca de cada ejercicio. Las variantes TOP SET, BACK-OFF, TEST y descarga se agrupan bajo un nombre y se toma la mejor (nunca se suman).</p>
+    <div id="prog-list"></div>
+  </div>
+</section>
+
+<!-- ============ YO ============ -->
+<section id="v-yo" class="view" hidden>
+  <div class="wrap">
+    <h1>Yo</h1>
+
+    <h2>Datos fijos</h2>
+    <div class="panel">
+      <div class="grid3">
+        <div class="field"><label for="p-edad">Edad</label><input id="p-edad" inputmode="numeric" autocomplete="off"></div>
+        <div class="field"><label for="p-altura">Altura (cm)</label><input id="p-altura" inputmode="decimal" autocomplete="off"></div>
+        <div class="field"><label for="p-sexo">Sexo</label>
+          <select id="p-sexo"><option value="">—</option><option>Hombre</option><option>Mujer</option></select></div>
+      </div>
+    </div>
+
+    <h2>Peso corporal y cintura</h2>
+    <div class="panel">
+      <div class="field"><label for="c-fecha">Fecha</label><input id="c-fecha" type="date"></div>
+      <div class="grid2">
+        <div class="field"><label for="c-peso">Peso (lb)</label><input id="c-peso" inputmode="decimal" autocomplete="off"></div>
+        <div class="field"><label for="c-cintura">Cintura (cm)</label><input id="c-cintura" inputmode="decimal" autocomplete="off"></div>
+      </div>
+      <div class="actions"><button class="btn primary grow" id="c-guardar">Guardar</button><button class="btn" id="c-cancelar" hidden>Cancelar</button></div>
+      <div class="list" id="c-list"></div>
+    </div>
+
+    <h2>Sueño</h2>
+    <div class="panel">
+      <div class="muted small">Promedio de los últimos 7 días</div>
+      <div class="avg" id="s-avg">—</div>
+      <div class="grid2">
+        <div class="field"><label for="s-fecha">Fecha</label><input id="s-fecha" type="date"></div>
+        <div class="field"><label for="s-horas">Horas dormidas</label><input id="s-horas" inputmode="decimal" autocomplete="off"></div>
+      </div>
+      <div class="actions"><button class="btn primary grow" id="s-guardar">Guardar</button><button class="btn" id="s-cancelar" hidden>Cancelar</button></div>
+      <div class="list" id="s-list"></div>
+    </div>
+
+    <h2>Copia de seguridad</h2>
+    <div class="panel">
+      <p class="small muted" style="margin-top:0">Tus datos viven solo en este teléfono. Exporta de vez en cuando y guarda el archivo en Archivos o iCloud Drive.</p>
+      <div class="actions">
+        <button class="btn primary grow" id="exportar">Exportar datos</button>
+        <button class="btn grow" id="importar">Importar datos</button>
+      </div>
+      <input type="file" id="importar-file" accept="application/json,.json" hidden>
+      <p class="small muted" id="ultima-export"></p>
+    </div>
+  </div>
+</section>
+
+<nav class="tabs" role="tablist">
+  <button data-view="hoy" aria-pressed="true">Hoy</button>
+  <button data-view="progreso" aria-pressed="false">Progreso</button>
+  <button data-view="yo" aria-pressed="false">Yo</button>
+</nav>
+
+<div class="overlay" id="swap" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="swap-title">
+    <h3 id="swap-title">Cambiar ejercicio</h3>
+    <div class="field" style="margin:0"><input id="swap-q" placeholder="Buscar o escribir uno nuevo" autocomplete="off"></div>
+    <div class="opts" id="swap-opts"></div>
+    <div class="actions" style="margin-top:0">
+      <button class="btn" id="swap-orig" hidden>Volver al original</button>
+      <button class="btn grow" id="swap-cerrar">Cerrar</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+// Generado desde Rutina_Hipertrofia_Fuerza_16semanas_v6.xlsx — no editar a mano.
+window.PROGRAMA = {"fuente":"Rutina_Hipertrofia_Fuerza_16semanas_v6.xlsx","dias":["TORSO A","PIERNA A","TORSO B","PIERNA B"],"semanas":{"1":{"TORSO A":[{"nombre":"Press banca con mancuernas","series":4,"tipo":"normal","min":6,"max":10,"rir":3},{"nombre":"Remo en máquina T (apoyo en pecho)","series":4,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Press militar con mancuernas","series":3,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Jalón al pecho / dominadas asistidas","series":3,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Aperturas en polea (cable fly)","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Elevaciones laterales","series":3,"tipo":"normal","min":15,"max":20,"rir":2},{"nombre":"Curl de bíceps con barra","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Extensión de tríceps en polea","series":3,"tipo":"normal","min":10,"max":12,"rir":2}],"PIERNA A":[{"nombre":"Sentadilla con barra","series":4,"tipo":"normal","min":6,"max":10,"rir":3},{"nombre":"Peso muerto rumano (RDL)","series":3,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Hip thrust con barra","series":3,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Prensa de piernas","series":3,"tipo":"normal","min":10,"max":15,"rir":2},{"nombre":"Curl femoral tumbado","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Elevación de talones de pie","series":4,"tipo":"normal","min":10,"max":15,"rir":2},{"nombre":"Aductores en máquina","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Elevaciones laterales (3ª sesión semanal)","series":3,"tipo":"normal","min":15,"max":20,"rir":3},{"nombre":"Elevación de piernas colgado","series":3,"tipo":"normal","min":10,"max":15,"rir":2}],"TORSO B":[{"nombre":"Press inclinado con mancuernas","series":4,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Dominadas (o jalón agarre ancho)","series":4,"tipo":"normal","min":6,"max":10,"rir":3},{"nombre":"Press Arnold","series":3,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Remo en polea baja, agarre neutro","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Cruce de poleas (crossover)","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Elevación lateral egipcia en polea (2ª sesión semanal)","series":3,"tipo":"normal","min":15,"max":20,"rir":2},{"nombre":"Face pull","series":3,"tipo":"normal","min":15,"max":20,"rir":3},{"nombre":"Curl martillo","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Press francés (skull crusher)","series":3,"tipo":"normal","min":10,"max":12,"rir":2}],"PIERNA B":[{"nombre":"Peso muerto convencional — TOP SET","series":1,"tipo":"normal","min":6,"max":8,"rir":2},{"nombre":"Peso muerto convencional — BACK-OFF","series":2,"tipo":"normal","min":6,"max":8,"rir":4},{"nombre":"Sentadilla búlgara con mancuernas","series":3,"tipo":"normal","min":8,"max":12,"rir":2},{"nombre":"Extensión de cuádriceps","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Curl femoral sentado","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Elevación de talones sentado","series":4,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Abductores en máquina","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Plancha abdominal","series":3,"tipo":"tiempo","min":30,"max":45,"rir":2}]},"2":{"TORSO A":[{"nombre":"Press banca con mancuernas","series":4,"tipo":"normal","min":6,"max":10,"rir":3},{"nombre":"Remo en máquina T (apoyo en pecho)","series":4,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Press militar con mancuernas","series":3,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Jalón al pecho / dominadas asistidas","series":3,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Aperturas en polea (cable fly)","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Elevaciones laterales","series":3,"tipo":"normal","min":15,"max":20,"rir":2},{"nombre":"Curl de bíceps con barra","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Extensión de tríceps en polea","series":3,"tipo":"normal","min":10,"max":12,"rir":2}],"PIERNA A":[{"nombre":"Sentadilla con barra","series":4,"tipo":"normal","min":6,"max":10,"rir":3},{"nombre":"Peso muerto rumano (RDL)","series":3,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Hip thrust con barra","series":3,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Prensa de piernas","series":3,"tipo":"normal","min":10,"max":15,"rir":2},{"nombre":"Curl femoral tumbado","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Elevación de talones de pie","series":4,"tipo":"normal","min":10,"max":15,"rir":2},{"nombre":"Aductores en máquina","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Elevaciones laterales (3ª sesión semanal)","series":3,"tipo":"normal","min":15,"max":20,"rir":3},{"nombre":"Elevación de piernas colgado","series":3,"tipo":"normal","min":10,"max":15,"rir":2}],"TORSO B":[{"nombre":"Press inclinado con mancuernas","series":4,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Dominadas (o jalón agarre ancho)","series":4,"tipo":"normal","min":6,"max":10,"rir":3},{"nombre":"Press Arnold","series":3,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Remo en polea baja, agarre neutro","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Cruce de poleas (crossover)","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Elevación lateral egipcia en polea (2ª sesión semanal)","series":3,"tipo":"normal","min":15,"max":20,"rir":2},{"nombre":"Face pull","series":3,"tipo":"normal","min":15,"max":20,"rir":3},{"nombre":"Curl martillo","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Press francés (skull crusher)","series":3,"tipo":"normal","min":10,"max":12,"rir":2}],"PIERNA B":[{"nombre":"Peso muerto convencional — TOP SET","series":1,"tipo":"normal","min":6,"max":8,"rir":2},{"nombre":"Peso muerto convencional — BACK-OFF","series":2,"tipo":"normal","min":6,"max":8,"rir":4},{"nombre":"Sentadilla búlgara con mancuernas","series":3,"tipo":"normal","min":8,"max":12,"rir":2},{"nombre":"Extensión de cuádriceps","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Curl femoral sentado","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Elevación de talones sentado","series":4,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Abductores en máquina","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Plancha abdominal","series":3,"tipo":"tiempo","min":30,"max":45,"rir":2}]},"3":{"TORSO A":[{"nombre":"Press banca con mancuernas","series":4,"tipo":"normal","min":6,"max":10,"rir":3},{"nombre":"Remo en máquina T (apoyo en pecho)","series":4,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Press militar con mancuernas","series":3,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Jalón al pecho / dominadas asistidas","series":3,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Aperturas en polea (cable fly)","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Elevaciones laterales","series":3,"tipo":"normal","min":15,"max":20,"rir":2},{"nombre":"Curl de bíceps con barra","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Extensión de tríceps en polea","series":3,"tipo":"normal","min":10,"max":12,"rir":2}],"PIERNA A":[{"nombre":"Sentadilla con barra","series":4,"tipo":"normal","min":6,"max":10,"rir":3},{"nombre":"Peso muerto rumano (RDL)","series":3,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Hip thrust con barra","series":3,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Prensa de piernas","series":3,"tipo":"normal","min":10,"max":15,"rir":2},{"nombre":"Curl femoral tumbado","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Elevación de talones de pie","series":4,"tipo":"normal","min":10,"max":15,"rir":2},{"nombre":"Aductores en máquina","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Elevaciones laterales (3ª sesión semanal)","series":3,"tipo":"normal","min":15,"max":20,"rir":3},{"nombre":"Elevación de piernas colgado","series":3,"tipo":"normal","min":10,"max":15,"rir":2}],"TORSO B":[{"nombre":"Press inclinado con mancuernas","series":4,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Dominadas (o jalón agarre ancho)","series":4,"tipo":"normal","min":6,"max":10,"rir":3},{"nombre":"Press Arnold","series":3,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Remo en polea baja, agarre neutro","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Cruce de poleas (crossover)","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Elevación lateral egipcia en polea (2ª sesión semanal)","series":3,"tipo":"normal","min":15,"max":20,"rir":2},{"nombre":"Face pull","series":3,"tipo":"normal","min":15,"max":20,"rir":3},{"nombre":"Curl martillo","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Press francés (skull crusher)","series":3,"tipo":"normal","min":10,"max":12,"rir":2}],"PIERNA B":[{"nombre":"Peso muerto convencional — TOP SET","series":1,"tipo":"normal","min":6,"max":8,"rir":2},{"nombre":"Peso muerto convencional — BACK-OFF","series":2,"tipo":"normal","min":6,"max":8,"rir":4},{"nombre":"Sentadilla búlgara con mancuernas","series":3,"tipo":"normal","min":8,"max":12,"rir":2},{"nombre":"Extensión de cuádriceps","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Curl femoral sentado","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Elevación de talones sentado","series":4,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Abductores en máquina","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Plancha abdominal","series":3,"tipo":"tiempo","min":30,"max":45,"rir":2}]},"4":{"TORSO A":[{"nombre":"Press banca con mancuernas","series":4,"tipo":"normal","min":6,"max":10,"rir":3},{"nombre":"Remo en máquina T (apoyo en pecho)","series":4,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Press militar con mancuernas","series":3,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Jalón al pecho / dominadas asistidas","series":3,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Aperturas en polea (cable fly)","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Elevaciones laterales","series":3,"tipo":"normal","min":15,"max":20,"rir":2},{"nombre":"Curl de bíceps con barra","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Extensión de tríceps en polea","series":3,"tipo":"normal","min":10,"max":12,"rir":2}],"PIERNA A":[{"nombre":"Sentadilla con barra","series":4,"tipo":"normal","min":6,"max":10,"rir":3},{"nombre":"Peso muerto rumano (RDL)","series":3,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Hip thrust con barra","series":3,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Prensa de piernas","series":3,"tipo":"normal","min":10,"max":15,"rir":2},{"nombre":"Curl femoral tumbado","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Elevación de talones de pie","series":4,"tipo":"normal","min":10,"max":15,"rir":2},{"nombre":"Aductores en máquina","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Elevaciones laterales (3ª sesión semanal)","series":3,"tipo":"normal","min":15,"max":20,"rir":3},{"nombre":"Elevación de piernas colgado","series":3,"tipo":"normal","min":10,"max":15,"rir":2}],"TORSO B":[{"nombre":"Press inclinado con mancuernas","series":4,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Dominadas (o jalón agarre ancho)","series":4,"tipo":"normal","min":6,"max":10,"rir":3},{"nombre":"Press Arnold","series":3,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Remo en polea baja, agarre neutro","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Cruce de poleas (crossover)","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Elevación lateral egipcia en polea (2ª sesión semanal)","series":3,"tipo":"normal","min":15,"max":20,"rir":2},{"nombre":"Face pull","series":3,"tipo":"normal","min":15,"max":20,"rir":3},{"nombre":"Curl martillo","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Press francés (skull crusher)","series":3,"tipo":"normal","min":10,"max":12,"rir":2}],"PIERNA B":[{"nombre":"Peso muerto convencional — TOP SET","series":1,"tipo":"normal","min":6,"max":8,"rir":2},{"nombre":"Peso muerto convencional — BACK-OFF","series":2,"tipo":"normal","min":6,"max":8,"rir":4},{"nombre":"Sentadilla búlgara con mancuernas","series":3,"tipo":"normal","min":8,"max":12,"rir":2},{"nombre":"Extensión de cuádriceps","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Curl femoral sentado","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Elevación de talones sentado","series":4,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Abductores en máquina","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Plancha abdominal","series":3,"tipo":"tiempo","min":30,"max":45,"rir":2}]},"5":{"TORSO A":[{"nombre":"Press banca con mancuernas","series":4,"tipo":"normal","min":6,"max":10,"rir":3},{"nombre":"Remo en máquina T (apoyo en pecho)","series":4,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Press militar con mancuernas","series":3,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Jalón al pecho / dominadas asistidas","series":3,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Aperturas en polea (cable fly)","series":3,"tipo":"normal","min":12,"max":15,"rir":1,"nota_rir":"fallo opcional en la última serie"},{"nombre":"Elevaciones laterales","series":3,"tipo":"normal","min":15,"max":20,"rir":2,"nota_rir":"fallo opcional en la última serie"},{"nombre":"Curl de bíceps con barra","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Extensión de tríceps en polea","series":3,"tipo":"normal","min":10,"max":12,"rir":2}],"PIERNA A":[{"nombre":"Sentadilla con barra","series":4,"tipo":"normal","min":6,"max":10,"rir":3},{"nombre":"Peso muerto rumano (RDL)","series":3,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Hip thrust con barra","series":3,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Prensa de piernas","series":3,"tipo":"normal","min":10,"max":15,"rir":2},{"nombre":"Curl femoral tumbado","series":3,"tipo":"normal","min":10,"max":12,"rir":2,"nota_rir":"fallo opcional en la última serie"},{"nombre":"Elevación de talones de pie","series":4,"tipo":"normal","min":10,"max":15,"rir":2,"nota_rir":"fallo opcional en la última serie"},{"nombre":"Aductores en máquina","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Elevaciones laterales (3ª sesión semanal)","series":3,"tipo":"normal","min":15,"max":20,"rir":3},{"nombre":"Elevación de piernas colgado","series":3,"tipo":"normal","min":10,"max":15,"rir":2}],"TORSO B":[{"nombre":"Press inclinado con mancuernas","series":4,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Dominadas (o jalón agarre ancho)","series":4,"tipo":"normal","min":6,"max":10,"rir":3},{"nombre":"Press Arnold","series":3,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Remo en polea baja, agarre neutro","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Cruce de poleas (crossover)","series":3,"tipo":"normal","min":12,"max":15,"rir":1,"nota_rir":"fallo opcional en la última serie"},{"nombre":"Elevación lateral egipcia en polea (2ª sesión semanal)","series":3,"tipo":"normal","min":15,"max":20,"rir":2},{"nombre":"Face pull","series":3,"tipo":"normal","min":15,"max":20,"rir":3},{"nombre":"Curl martillo","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Press francés (skull crusher)","series":3,"tipo":"normal","min":10,"max":12,"rir":2}],"PIERNA B":[{"nombre":"Peso muerto convencional — TOP SET","series":1,"tipo":"normal","min":6,"max":8,"rir":2},{"nombre":"Peso muerto convencional — BACK-OFF","series":2,"tipo":"normal","min":6,"max":8,"rir":4},{"nombre":"Sentadilla búlgara con mancuernas","series":3,"tipo":"normal","min":8,"max":12,"rir":2},{"nombre":"Extensión de cuádriceps","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Curl femoral sentado","series":3,"tipo":"normal","min":10,"max":12,"rir":2,"nota_rir":"fallo opcional en la última serie"},{"nombre":"Elevación de talones sentado","series":4,"tipo":"normal","min":12,"max":15,"rir":2,"nota_rir":"fallo opcional en la última serie"},{"nombre":"Abductores en máquina","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Plancha abdominal","series":3,"tipo":"tiempo","min":30,"max":45,"rir":2}]},"6":{"TORSO A":[{"nombre":"Press banca con mancuernas","series":4,"tipo":"normal","min":6,"max":10,"rir":3},{"nombre":"Remo en máquina T (apoyo en pecho)","series":4,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Press militar con mancuernas","series":3,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Jalón al pecho / dominadas asistidas","series":3,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Aperturas en polea (cable fly)","series":3,"tipo":"normal","min":12,"max":15,"rir":1,"nota_rir":"fallo opcional en la última serie"},{"nombre":"Elevaciones laterales","series":3,"tipo":"normal","min":15,"max":20,"rir":2,"nota_rir":"fallo opcional en la última serie"},{"nombre":"Curl de bíceps con barra","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Extensión de tríceps en polea","series":3,"tipo":"normal","min":10,"max":12,"rir":2}],"PIERNA A":[{"nombre":"Sentadilla con barra","series":4,"tipo":"normal","min":6,"max":10,"rir":3},{"nombre":"Peso muerto rumano (RDL)","series":3,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Hip thrust con barra","series":3,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Prensa de piernas","series":3,"tipo":"normal","min":10,"max":15,"rir":2},{"nombre":"Curl femoral tumbado","series":3,"tipo":"normal","min":10,"max":12,"rir":2,"nota_rir":"fallo opcional en la última serie"},{"nombre":"Elevación de talones de pie","series":4,"tipo":"normal","min":10,"max":15,"rir":2,"nota_rir":"fallo opcional en la última serie"},{"nombre":"Aductores en máquina","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Elevaciones laterales (3ª sesión semanal)","series":3,"tipo":"normal","min":15,"max":20,"rir":3},{"nombre":"Elevación de piernas colgado","series":3,"tipo":"normal","min":10,"max":15,"rir":2}],"TORSO B":[{"nombre":"Press inclinado con mancuernas","series":4,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Dominadas (o jalón agarre ancho)","series":4,"tipo":"normal","min":6,"max":10,"rir":3},{"nombre":"Press Arnold","series":3,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Remo en polea baja, agarre neutro","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Cruce de poleas (crossover)","series":3,"tipo":"normal","min":12,"max":15,"rir":1,"nota_rir":"fallo opcional en la última serie"},{"nombre":"Elevación lateral egipcia en polea (2ª sesión semanal)","series":3,"tipo":"normal","min":15,"max":20,"rir":2},{"nombre":"Face pull","series":3,"tipo":"normal","min":15,"max":20,"rir":3},{"nombre":"Curl martillo","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Press francés (skull crusher)","series":3,"tipo":"normal","min":10,"max":12,"rir":2}],"PIERNA B":[{"nombre":"Peso muerto convencional — TOP SET","series":1,"tipo":"normal","min":6,"max":8,"rir":2},{"nombre":"Peso muerto convencional — BACK-OFF","series":2,"tipo":"normal","min":6,"max":8,"rir":4},{"nombre":"Sentadilla búlgara con mancuernas","series":3,"tipo":"normal","min":8,"max":12,"rir":2},{"nombre":"Extensión de cuádriceps","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Curl femoral sentado","series":3,"tipo":"normal","min":10,"max":12,"rir":2,"nota_rir":"fallo opcional en la última serie"},{"nombre":"Elevación de talones sentado","series":4,"tipo":"normal","min":12,"max":15,"rir":2,"nota_rir":"fallo opcional en la última serie"},{"nombre":"Abductores en máquina","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Plancha abdominal","series":3,"tipo":"tiempo","min":30,"max":45,"rir":2}]},"7":{"TORSO A":[{"nombre":"Press banca con mancuernas","series":2,"tipo":"normal","min":6,"max":10,"rir":5},{"nombre":"Remo en máquina T (apoyo en pecho)","series":2,"tipo":"normal","min":8,"max":12,"rir":5},{"nombre":"Press militar con mancuernas","series":2,"tipo":"normal","min":8,"max":12,"rir":5},{"nombre":"Jalón al pecho / dominadas asistidas","series":2,"tipo":"normal","min":8,"max":12,"rir":5},{"nombre":"Aperturas en polea (cable fly)","series":2,"tipo":"normal","min":12,"max":15,"rir":5},{"nombre":"Elevaciones laterales","series":2,"tipo":"normal","min":15,"max":20,"rir":5}],"PIERNA A":[{"nombre":"Sentadilla con barra","series":2,"tipo":"normal","min":6,"max":10,"rir":5},{"nombre":"Peso muerto rumano","series":2,"tipo":"normal","min":8,"max":12,"rir":5},{"nombre":"Hip thrust con barra (deload)","series":2,"tipo":"normal","min":8,"max":12,"rir":5},{"nombre":"Prensa de piernas","series":2,"tipo":"normal","min":10,"max":15,"rir":5},{"nombre":"Curl femoral tumbado","series":2,"tipo":"normal","min":10,"max":12,"rir":5},{"nombre":"Elevación de talones de pie","series":2,"tipo":"normal","min":10,"max":15,"rir":5},{"nombre":"Aductores en máquina (deload)","series":2,"tipo":"normal","min":12,"max":15,"rir":5},{"nombre":"Elevación de piernas colgado","series":2,"tipo":"normal","min":10,"max":15,"rir":5}],"TORSO B":[{"nombre":"Press inclinado con mancuernas","series":2,"tipo":"normal","min":8,"max":12,"rir":5},{"nombre":"Dominadas (o jalón agarre ancho)","series":2,"tipo":"normal","min":6,"max":10,"rir":5},{"nombre":"Press Arnold","series":2,"tipo":"normal","min":8,"max":12,"rir":5},{"nombre":"Remo en polea baja, agarre neutro","series":2,"tipo":"normal","min":10,"max":12,"rir":5},{"nombre":"Cruce de poleas (crossover)","series":2,"tipo":"normal","min":12,"max":15,"rir":5},{"nombre":"Face pull","series":2,"tipo":"normal","min":15,"max":20,"rir":5}],"PIERNA B":[{"nombre":"Peso muerto convencional","series":2,"tipo":"normal","min":6,"max":8,"rir":5},{"nombre":"Sentadilla búlgara con mancuernas","series":2,"tipo":"normal","min":8,"max":12,"rir":5},{"nombre":"Extensión de cuádriceps","series":2,"tipo":"normal","min":12,"max":15,"rir":5},{"nombre":"Curl femoral sentado","series":2,"tipo":"normal","min":10,"max":12,"rir":5},{"nombre":"Elevación de talones sentado","series":2,"tipo":"normal","min":12,"max":15,"rir":5},{"nombre":"Abductores en máquina (deload)","series":2,"tipo":"normal","min":12,"max":15,"rir":5},{"nombre":"Plancha abdominal","series":2,"tipo":"tiempo","min":30,"max":45,"rir":5}]},"8":{"TORSO A":[{"nombre":"Press banca en multipower (Smith) — TOP SET","series":1,"tipo":"normal","min":3,"max":5,"rir":2},{"nombre":"Press banca en multipower (Smith) — BACK-OFF","series":3,"tipo":"normal","min":3,"max":5,"rir":4},{"nombre":"Remo en máquina T (apoyo en pecho)","series":4,"tipo":"normal","min":5,"max":6,"rir":3},{"nombre":"Press militar con barra — TOP SET","series":1,"tipo":"normal","min":5,"max":6,"rir":2},{"nombre":"Press militar con barra — BACK-OFF","series":2,"tipo":"normal","min":5,"max":6,"rir":3},{"nombre":"Jalón al pecho / dominadas lastradas","series":3,"tipo":"normal","min":6,"max":8,"rir":2},{"nombre":"Elevaciones laterales","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Curl de bíceps","series":2,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Extensión de tríceps por encima de la cabeza (polea)","series":2,"tipo":"normal","min":10,"max":12,"rir":2}],"PIERNA A":[{"nombre":"Sentadilla con barra — TOP SET","series":1,"tipo":"normal","min":3,"max":5,"rir":2},{"nombre":"Sentadilla con barra — BACK-OFF","series":3,"tipo":"normal","min":3,"max":5,"rir":4},{"nombre":"Peso muerto rumano","series":3,"tipo":"normal","min":6,"max":8,"rir":2},{"nombre":"Hip thrust con barra","series":2,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Prensa de piernas","series":3,"tipo":"normal","min":8,"max":10,"rir":2},{"nombre":"Curl femoral sentado","series":2,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Elevación de talones de pie","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Aductores en máquina","series":2,"tipo":"normal","min":12,"max":15,"rir":2}],"TORSO B":[{"nombre":"Press inclinado en multipower","series":4,"tipo":"normal","min":5,"max":6,"rir":3},{"nombre":"Dominadas lastradas","series":4,"tipo":"normal","min":5,"max":6,"rir":3},{"nombre":"Press militar con mancuernas","series":3,"tipo":"normal","min":6,"max":8,"rir":3},{"nombre":"Remo en polea","series":3,"tipo":"normal","min":8,"max":10,"rir":2},{"nombre":"Face pull","series":2,"tipo":"normal","min":15,"max":20,"rir":3},{"nombre":"Curl martillo","series":2,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Fondos en paralelas (lastrados si es posible)","series":3,"tipo":"normal","min":6,"max":8,"rir":2}],"PIERNA B":[{"nombre":"Peso muerto convencional — TOP SET","series":1,"tipo":"normal","min":3,"max":5,"rir":2},{"nombre":"Peso muerto convencional — BACK-OFF","series":3,"tipo":"normal","min":3,"max":5,"rir":4},{"nombre":"Sentadilla frontal o búlgara","series":3,"tipo":"normal","min":6,"max":8,"rir":3},{"nombre":"Extensión de cuádriceps","series":2,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Curl femoral sentado","series":2,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Elevación de talones de pie","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Abductores en máquina","series":2,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Plancha abdominal","series":3,"tipo":"tiempo","min":45,"max":60,"rir":2}]},"9":{"TORSO A":[{"nombre":"Press banca en multipower (Smith) — TOP SET","series":1,"tipo":"normal","min":3,"max":5,"rir":2},{"nombre":"Press banca en multipower (Smith) — BACK-OFF","series":3,"tipo":"normal","min":3,"max":5,"rir":4},{"nombre":"Remo en máquina T (apoyo en pecho)","series":4,"tipo":"normal","min":5,"max":6,"rir":3},{"nombre":"Press militar con barra — TOP SET","series":1,"tipo":"normal","min":5,"max":6,"rir":2},{"nombre":"Press militar con barra — BACK-OFF","series":2,"tipo":"normal","min":5,"max":6,"rir":3},{"nombre":"Jalón al pecho / dominadas lastradas","series":3,"tipo":"normal","min":6,"max":8,"rir":2},{"nombre":"Elevaciones laterales","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Curl de bíceps","series":2,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Extensión de tríceps por encima de la cabeza (polea)","series":2,"tipo":"normal","min":10,"max":12,"rir":2}],"PIERNA A":[{"nombre":"Sentadilla con barra — TOP SET","series":1,"tipo":"normal","min":3,"max":5,"rir":2},{"nombre":"Sentadilla con barra — BACK-OFF","series":3,"tipo":"normal","min":3,"max":5,"rir":4},{"nombre":"Peso muerto rumano","series":3,"tipo":"normal","min":6,"max":8,"rir":2},{"nombre":"Hip thrust con barra","series":2,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Prensa de piernas","series":3,"tipo":"normal","min":8,"max":10,"rir":2},{"nombre":"Curl femoral sentado","series":2,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Elevación de talones de pie","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Aductores en máquina","series":2,"tipo":"normal","min":12,"max":15,"rir":2}],"TORSO B":[{"nombre":"Press inclinado en multipower","series":4,"tipo":"normal","min":5,"max":6,"rir":3},{"nombre":"Dominadas lastradas","series":4,"tipo":"normal","min":5,"max":6,"rir":3},{"nombre":"Press militar con mancuernas","series":3,"tipo":"normal","min":6,"max":8,"rir":3},{"nombre":"Remo en polea","series":3,"tipo":"normal","min":8,"max":10,"rir":2},{"nombre":"Face pull","series":2,"tipo":"normal","min":15,"max":20,"rir":3},{"nombre":"Curl martillo","series":2,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Fondos en paralelas (lastrados si es posible)","series":3,"tipo":"normal","min":6,"max":8,"rir":2}],"PIERNA B":[{"nombre":"Peso muerto convencional — TOP SET","series":1,"tipo":"normal","min":3,"max":5,"rir":2},{"nombre":"Peso muerto convencional — BACK-OFF","series":3,"tipo":"normal","min":3,"max":5,"rir":4},{"nombre":"Sentadilla frontal o búlgara","series":3,"tipo":"normal","min":6,"max":8,"rir":3},{"nombre":"Extensión de cuádriceps","series":2,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Curl femoral sentado","series":2,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Elevación de talones de pie","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Abductores en máquina","series":2,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Plancha abdominal","series":3,"tipo":"tiempo","min":45,"max":60,"rir":2}]},"10":{"TORSO A":[{"nombre":"Press banca en multipower (Smith) — TOP SET","series":1,"tipo":"normal","min":3,"max":5,"rir":2},{"nombre":"Press banca en multipower (Smith) — BACK-OFF","series":3,"tipo":"normal","min":3,"max":5,"rir":3},{"nombre":"Remo en máquina T (apoyo en pecho)","series":4,"tipo":"normal","min":5,"max":6,"rir":3},{"nombre":"Press militar con barra — TOP SET","series":1,"tipo":"normal","min":5,"max":6,"rir":2},{"nombre":"Press militar con barra — BACK-OFF","series":2,"tipo":"normal","min":5,"max":6,"rir":3},{"nombre":"Jalón al pecho / dominadas lastradas","series":3,"tipo":"normal","min":6,"max":8,"rir":2},{"nombre":"Elevaciones laterales","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Curl de bíceps","series":2,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Extensión de tríceps por encima de la cabeza (polea)","series":2,"tipo":"normal","min":10,"max":12,"rir":2}],"PIERNA A":[{"nombre":"Sentadilla con barra — TOP SET","series":1,"tipo":"normal","min":3,"max":5,"rir":2},{"nombre":"Sentadilla con barra — BACK-OFF","series":3,"tipo":"normal","min":3,"max":5,"rir":3},{"nombre":"Peso muerto rumano","series":3,"tipo":"normal","min":6,"max":8,"rir":2},{"nombre":"Hip thrust con barra","series":2,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Prensa de piernas","series":3,"tipo":"normal","min":8,"max":10,"rir":2},{"nombre":"Curl femoral sentado","series":2,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Elevación de talones de pie","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Aductores en máquina","series":2,"tipo":"normal","min":12,"max":15,"rir":2}],"TORSO B":[{"nombre":"Press inclinado en multipower","series":4,"tipo":"normal","min":5,"max":6,"rir":3},{"nombre":"Dominadas lastradas","series":4,"tipo":"normal","min":5,"max":6,"rir":3},{"nombre":"Press militar con mancuernas","series":3,"tipo":"normal","min":6,"max":8,"rir":3},{"nombre":"Remo en polea","series":3,"tipo":"normal","min":8,"max":10,"rir":2},{"nombre":"Face pull","series":2,"tipo":"normal","min":15,"max":20,"rir":3},{"nombre":"Curl martillo","series":2,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Fondos en paralelas (lastrados si es posible)","series":3,"tipo":"normal","min":6,"max":8,"rir":2}],"PIERNA B":[{"nombre":"Peso muerto convencional — TOP SET","series":1,"tipo":"normal","min":3,"max":5,"rir":2},{"nombre":"Peso muerto convencional — BACK-OFF","series":3,"tipo":"normal","min":3,"max":5,"rir":3},{"nombre":"Sentadilla frontal o búlgara","series":3,"tipo":"normal","min":6,"max":8,"rir":3},{"nombre":"Extensión de cuádriceps","series":2,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Curl femoral sentado","series":2,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Elevación de talones de pie","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Abductores en máquina","series":2,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Plancha abdominal","series":3,"tipo":"tiempo","min":45,"max":60,"rir":2}]},"11":{"TORSO A":[{"nombre":"Press banca en multipower (Smith) — TOP SET","series":1,"tipo":"normal","min":3,"max":5,"rir":2},{"nombre":"Press banca en multipower (Smith) — BACK-OFF","series":3,"tipo":"normal","min":3,"max":5,"rir":3},{"nombre":"Remo en máquina T (apoyo en pecho)","series":4,"tipo":"normal","min":5,"max":6,"rir":3},{"nombre":"Press militar con barra — TOP SET","series":1,"tipo":"normal","min":5,"max":6,"rir":2},{"nombre":"Press militar con barra — BACK-OFF","series":2,"tipo":"normal","min":5,"max":6,"rir":3},{"nombre":"Jalón al pecho / dominadas lastradas","series":3,"tipo":"normal","min":6,"max":8,"rir":2},{"nombre":"Elevaciones laterales","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Curl de bíceps","series":2,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Extensión de tríceps por encima de la cabeza (polea)","series":2,"tipo":"normal","min":10,"max":12,"rir":2}],"PIERNA A":[{"nombre":"Sentadilla con barra — TOP SET","series":1,"tipo":"normal","min":3,"max":5,"rir":2},{"nombre":"Sentadilla con barra — BACK-OFF","series":3,"tipo":"normal","min":3,"max":5,"rir":3},{"nombre":"Peso muerto rumano","series":3,"tipo":"normal","min":6,"max":8,"rir":2},{"nombre":"Hip thrust con barra","series":2,"tipo":"normal","min":8,"max":12,"rir":3},{"nombre":"Prensa de piernas","series":3,"tipo":"normal","min":8,"max":10,"rir":2},{"nombre":"Curl femoral sentado","series":2,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Elevación de talones de pie","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Aductores en máquina","series":2,"tipo":"normal","min":12,"max":15,"rir":2}],"TORSO B":[{"nombre":"Press inclinado en multipower","series":4,"tipo":"normal","min":5,"max":6,"rir":3},{"nombre":"Dominadas lastradas","series":4,"tipo":"normal","min":5,"max":6,"rir":3},{"nombre":"Press militar con mancuernas","series":3,"tipo":"normal","min":6,"max":8,"rir":3},{"nombre":"Remo en polea","series":3,"tipo":"normal","min":8,"max":10,"rir":2},{"nombre":"Face pull","series":2,"tipo":"normal","min":15,"max":20,"rir":3},{"nombre":"Curl martillo","series":2,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Fondos en paralelas (lastrados si es posible)","series":3,"tipo":"normal","min":6,"max":8,"rir":2}],"PIERNA B":[{"nombre":"Peso muerto convencional — TOP SET","series":1,"tipo":"normal","min":3,"max":5,"rir":2},{"nombre":"Peso muerto convencional — BACK-OFF","series":3,"tipo":"normal","min":3,"max":5,"rir":3},{"nombre":"Sentadilla frontal o búlgara","series":3,"tipo":"normal","min":6,"max":8,"rir":3},{"nombre":"Extensión de cuádriceps","series":2,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Curl femoral sentado","series":2,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Elevación de talones de pie","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Abductores en máquina","series":2,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Plancha abdominal","series":3,"tipo":"tiempo","min":45,"max":60,"rir":2}]},"12":{"TORSO A":[{"nombre":"Press banca en multipower (Smith)","series":2,"tipo":"normal","min":3,"max":5,"rir":5},{"nombre":"Remo en máquina T (apoyo en pecho)","series":2,"tipo":"normal","min":5,"max":6,"rir":5},{"nombre":"Press militar con barra","series":2,"tipo":"normal","min":5,"max":6,"rir":5},{"nombre":"Jalón al pecho / dominadas lastradas","series":2,"tipo":"normal","min":6,"max":8,"rir":5},{"nombre":"Elevaciones laterales","series":2,"tipo":"normal","min":12,"max":15,"rir":5}],"PIERNA A":[{"nombre":"Sentadilla con barra","series":2,"tipo":"normal","min":3,"max":5,"rir":5},{"nombre":"Peso muerto rumano","series":2,"tipo":"normal","min":6,"max":8,"rir":5},{"nombre":"Hip thrust con barra (deload)","series":2,"tipo":"normal","min":8,"max":12,"rir":5},{"nombre":"Prensa de piernas","series":2,"tipo":"normal","min":8,"max":10,"rir":5},{"nombre":"Curl femoral sentado","series":2,"tipo":"normal","min":10,"max":12,"rir":5},{"nombre":"Elevación de talones de pie","series":2,"tipo":"normal","min":10,"max":12,"rir":5},{"nombre":"Aductores en máquina (deload)","series":2,"tipo":"normal","min":12,"max":15,"rir":5}],"TORSO B":[{"nombre":"Press inclinado en multipower","series":2,"tipo":"normal","min":5,"max":6,"rir":5},{"nombre":"Dominadas lastradas","series":2,"tipo":"normal","min":5,"max":6,"rir":5},{"nombre":"Press militar con mancuernas","series":2,"tipo":"normal","min":6,"max":8,"rir":5},{"nombre":"Remo en polea","series":2,"tipo":"normal","min":8,"max":10,"rir":5},{"nombre":"Face pull","series":2,"tipo":"normal","min":15,"max":20,"rir":5}],"PIERNA B":[{"nombre":"Peso muerto convencional","series":2,"tipo":"normal","min":3,"max":5,"rir":5},{"nombre":"Sentadilla frontal o búlgara","series":2,"tipo":"normal","min":6,"max":8,"rir":5},{"nombre":"Extensión de cuádriceps","series":2,"tipo":"normal","min":10,"max":12,"rir":5},{"nombre":"Curl femoral sentado","series":2,"tipo":"normal","min":10,"max":12,"rir":5},{"nombre":"Elevación de talones de pie","series":2,"tipo":"normal","min":10,"max":12,"rir":5},{"nombre":"Abductores en máquina (deload)","series":2,"tipo":"normal","min":12,"max":15,"rir":5},{"nombre":"Plancha abdominal","series":2,"tipo":"tiempo","min":45,"max":60,"rir":5}]},"13":{"TORSO A":[{"nombre":"Press banca en multipower (Smith) — TOP SET","series":1,"tipo":"normal","min":4,"max":6,"rir":2},{"nombre":"Press banca en multipower (Smith) — BACK-OFF","series":2,"tipo":"normal","min":4,"max":6,"rir":3},{"nombre":"Remo en máquina T (apoyo en pecho)","series":4,"tipo":"normal","min":6,"max":8,"rir":2},{"nombre":"Press militar con mancuernas","series":3,"tipo":"normal","min":8,"max":10,"rir":2},{"nombre":"Jalón al pecho","series":3,"tipo":"normal","min":8,"max":10,"rir":2},{"nombre":"Aperturas en polea","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Elevaciones laterales","series":3,"tipo":"normal","min":15,"max":20,"rir":1},{"nombre":"Curl de bíceps","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Extensión de tríceps","series":3,"tipo":"normal","min":10,"max":12,"rir":2}],"PIERNA A":[{"nombre":"Sentadilla con barra — TOP SET","series":1,"tipo":"normal","min":4,"max":6,"rir":2},{"nombre":"Sentadilla con barra — BACK-OFF","series":2,"tipo":"normal","min":4,"max":6,"rir":3},{"nombre":"Peso muerto rumano","series":3,"tipo":"normal","min":8,"max":10,"rir":2},{"nombre":"Hip thrust con barra","series":3,"tipo":"normal","min":8,"max":12,"rir":2},{"nombre":"Prensa de piernas","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Curl femoral","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Elevación de talones","series":4,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Aductores en máquina","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Elevaciones laterales (3ª sesión semanal)","series":2,"tipo":"normal","min":15,"max":20,"rir":3}],"TORSO B":[{"nombre":"Press inclinado con mancuernas","series":4,"tipo":"normal","min":6,"max":8,"rir":2},{"nombre":"Dominadas","series":4,"tipo":"normal","min":6,"max":8,"rir":2},{"nombre":"Press Arnold","series":3,"tipo":"normal","min":8,"max":10,"rir":2},{"nombre":"Remo en polea","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Elevación lateral egipcia en polea (2ª sesión de la semana — ver Torso A)","series":2,"tipo":"normal","min":15,"max":20,"rir":2},{"nombre":"Face pull","series":3,"tipo":"normal","min":15,"max":20,"rir":3},{"nombre":"Curl martillo","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Press francés","series":3,"tipo":"normal","min":10,"max":12,"rir":2}],"PIERNA B":[{"nombre":"Peso muerto convencional — TOP SET","series":1,"tipo":"normal","min":4,"max":6,"rir":2},{"nombre":"Peso muerto convencional — BACK-OFF","series":2,"tipo":"normal","min":4,"max":6,"rir":3},{"nombre":"Sentadilla búlgara","series":3,"tipo":"normal","min":8,"max":10,"rir":2},{"nombre":"Extensión de cuádriceps","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Curl femoral","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Elevación de talones sentado","series":4,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Abductores en máquina","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Plancha abdominal","series":3,"tipo":"tiempo","min":45,"max":60,"rir":2}]},"14":{"TORSO A":[{"nombre":"Press banca en multipower (Smith) — TOP SET","series":1,"tipo":"normal","min":4,"max":6,"rir":2},{"nombre":"Press banca en multipower (Smith) — BACK-OFF","series":2,"tipo":"normal","min":4,"max":6,"rir":3},{"nombre":"Remo en máquina T (apoyo en pecho)","series":4,"tipo":"normal","min":6,"max":8,"rir":2},{"nombre":"Press militar con mancuernas","series":3,"tipo":"normal","min":8,"max":10,"rir":2},{"nombre":"Jalón al pecho","series":3,"tipo":"normal","min":8,"max":10,"rir":2},{"nombre":"Aperturas en polea","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Elevaciones laterales","series":3,"tipo":"normal","min":15,"max":20,"rir":1},{"nombre":"Curl de bíceps","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Extensión de tríceps","series":3,"tipo":"normal","min":10,"max":12,"rir":2}],"PIERNA A":[{"nombre":"Sentadilla con barra — TOP SET","series":1,"tipo":"normal","min":4,"max":6,"rir":2},{"nombre":"Sentadilla con barra — BACK-OFF","series":2,"tipo":"normal","min":4,"max":6,"rir":3},{"nombre":"Peso muerto rumano","series":3,"tipo":"normal","min":8,"max":10,"rir":2},{"nombre":"Hip thrust con barra","series":3,"tipo":"normal","min":8,"max":12,"rir":2},{"nombre":"Prensa de piernas","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Curl femoral","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Elevación de talones","series":4,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Aductores en máquina","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Elevaciones laterales (3ª sesión semanal)","series":2,"tipo":"normal","min":15,"max":20,"rir":3}],"TORSO B":[{"nombre":"Press inclinado con mancuernas","series":4,"tipo":"normal","min":6,"max":8,"rir":2},{"nombre":"Dominadas","series":4,"tipo":"normal","min":6,"max":8,"rir":2},{"nombre":"Press Arnold","series":3,"tipo":"normal","min":8,"max":10,"rir":2},{"nombre":"Remo en polea","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Elevación lateral egipcia en polea (2ª sesión de la semana — ver Torso A)","series":2,"tipo":"normal","min":15,"max":20,"rir":2},{"nombre":"Face pull","series":3,"tipo":"normal","min":15,"max":20,"rir":3},{"nombre":"Curl martillo","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Press francés","series":3,"tipo":"normal","min":10,"max":12,"rir":2}],"PIERNA B":[{"nombre":"Peso muerto convencional — TOP SET","series":1,"tipo":"normal","min":4,"max":6,"rir":2},{"nombre":"Peso muerto convencional — BACK-OFF","series":2,"tipo":"normal","min":4,"max":6,"rir":3},{"nombre":"Sentadilla búlgara","series":3,"tipo":"normal","min":8,"max":10,"rir":2},{"nombre":"Extensión de cuádriceps","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Curl femoral","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Elevación de talones sentado","series":4,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Abductores en máquina","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Plancha abdominal","series":3,"tipo":"tiempo","min":45,"max":60,"rir":2}]},"15":{"TORSO A":[{"nombre":"Press banca en multipower (Smith) — TOP SET","series":1,"tipo":"normal","min":4,"max":6,"rir":1},{"nombre":"Press banca en multipower (Smith) — BACK-OFF","series":2,"tipo":"normal","min":4,"max":6,"rir":2},{"nombre":"Remo en máquina T (apoyo en pecho)","series":4,"tipo":"normal","min":6,"max":8,"rir":2},{"nombre":"Press militar con mancuernas","series":3,"tipo":"normal","min":8,"max":10,"rir":2},{"nombre":"Jalón al pecho","series":3,"tipo":"normal","min":8,"max":10,"rir":2},{"nombre":"Aperturas en polea","series":3,"tipo":"normal","min":12,"max":15,"rir":1,"nota_rir":"fallo opcional en la última serie"},{"nombre":"Elevaciones laterales","series":3,"tipo":"normal","min":15,"max":20,"rir":1},{"nombre":"Curl de bíceps","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Extensión de tríceps","series":3,"tipo":"normal","min":10,"max":12,"rir":2}],"PIERNA A":[{"nombre":"Sentadilla con barra — TOP SET","series":1,"tipo":"normal","min":4,"max":6,"rir":1},{"nombre":"Sentadilla con barra — BACK-OFF","series":2,"tipo":"normal","min":4,"max":6,"rir":2},{"nombre":"Peso muerto rumano","series":3,"tipo":"normal","min":8,"max":10,"rir":2},{"nombre":"Hip thrust con barra","series":3,"tipo":"normal","min":8,"max":12,"rir":2},{"nombre":"Prensa de piernas","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Curl femoral","series":3,"tipo":"normal","min":10,"max":12,"rir":1,"nota_rir":"fallo opcional en la última serie"},{"nombre":"Elevación de talones","series":4,"tipo":"normal","min":12,"max":15,"rir":1,"nota_rir":"fallo opcional en la última serie"},{"nombre":"Aductores en máquina","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Elevaciones laterales (3ª sesión semanal)","series":2,"tipo":"normal","min":15,"max":20,"rir":3}],"TORSO B":[{"nombre":"Press inclinado con mancuernas","series":4,"tipo":"normal","min":6,"max":8,"rir":2},{"nombre":"Dominadas","series":4,"tipo":"normal","min":6,"max":8,"rir":2},{"nombre":"Press Arnold","series":3,"tipo":"normal","min":8,"max":10,"rir":2},{"nombre":"Remo en polea","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Elevación lateral egipcia en polea (2ª sesión de la semana — ver Torso A)","series":2,"tipo":"normal","min":15,"max":20,"rir":2},{"nombre":"Face pull","series":3,"tipo":"normal","min":15,"max":20,"rir":3},{"nombre":"Curl martillo","series":3,"tipo":"normal","min":10,"max":12,"rir":2},{"nombre":"Press francés","series":3,"tipo":"normal","min":10,"max":12,"rir":2}],"PIERNA B":[{"nombre":"Peso muerto convencional — TOP SET","series":1,"tipo":"normal","min":4,"max":6,"rir":1},{"nombre":"Peso muerto convencional — BACK-OFF","series":2,"tipo":"normal","min":4,"max":6,"rir":2},{"nombre":"Sentadilla búlgara","series":3,"tipo":"normal","min":8,"max":10,"rir":2},{"nombre":"Extensión de cuádriceps","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Curl femoral","series":3,"tipo":"normal","min":10,"max":12,"rir":1,"nota_rir":"fallo opcional en la última serie"},{"nombre":"Elevación de talones sentado","series":4,"tipo":"normal","min":12,"max":15,"rir":1,"nota_rir":"fallo opcional en la última serie"},{"nombre":"Abductores en máquina","series":3,"tipo":"normal","min":12,"max":15,"rir":2},{"nombre":"Plancha abdominal","series":3,"tipo":"tiempo","min":45,"max":60,"rir":2}]},"16":{"TORSO A":[{"nombre":"Press banca en multipower (Smith) — TEST 1RM","series":3,"tipo":"test","min":null,"max":null,"rir":null},{"nombre":"Jalón al pecho (opcional, ligero)","series":2,"tipo":"normal","min":8,"max":8,"rir":4},{"nombre":"Face pull","series":2,"tipo":"normal","min":15,"max":15,"rir":5}],"PIERNA A":[{"nombre":"Sentadilla con barra — TEST 1RM","series":3,"tipo":"test","min":null,"max":null,"rir":null}],"TORSO B":[{"nombre":"Press militar con barra — TEST e1RM (AMRAP controlado)","series":3,"tipo":"test","min":null,"max":null,"rir":null},{"nombre":"Dominadas (ligero, opcional)","series":2,"tipo":"normal","min":6,"max":6,"rir":4}],"PIERNA B":[{"nombre":"Peso muerto convencional — TEST 1RM","series":3,"tipo":"test","min":null,"max":null,"rir":null}]}}};
+
+</script>
+<script>
+// Lógica pura (sin pantalla): sugerencias, serie ancla, e1RM y grupos de variantes.
+// Una "serie" es { w: peso en lb | null, r: repeticiones (o segundos) | null }.
+(function (global) {
+  'use strict';
+
+  const num = (v) => (v === null || v === undefined || v === '' || isNaN(Number(v)) ? null : Number(v));
+
+  // Una serie está anotada cuando tiene repeticiones. Peso vacío = 0 (peso corporal).
+  function seriesAnotadas(series) {
+    return (series || [])
+      .filter((s) => s && num(s.r) !== null)
+      .map((s) => ({ w: num(s.w) === null ? 0 : num(s.w), r: num(s.r) }));
+  }
+
+  // Serie ancla: la de mayor peso; si hay empate, la última de ellas.
+  function serieAncla(series) {
+    const a = seriesAnotadas(series);
+    let ancla = null;
+    for (const s of a) {
+      if (ancla === null || s.w >= ancla.w) ancla = s;
+    }
+    return ancla;
+  }
+
+  // Devuelve { codigo, texto } o null si no corresponde sugerencia (tiempo / test).
+  function sugerencia(ej, series) {
+    if (!ej || ej.tipo === 'tiempo' || ej.tipo === 'test') return null;
+    const anotadas = seriesAnotadas(series);
+    if (anotadas.length === 0) return { codigo: 'sin', texto: 'SIN REGISTRO' };
+    if (anotadas.length < ej.series) return { codigo: 'incompleto', texto: 'REGISTRO INCOMPLETO' };
+    const ancla = serieAncla(series);
+    if (ancla.r < ej.min) return { codigo: 'revisar', texto: 'REVISAR RENDIMIENTO' };
+    if (ancla.r >= ej.max) return { codigo: 'subir', texto: 'SUBIR PESO' };
+    return { codigo: 'mas', texto: 'INTENTAR MÁS REPETICIONES' };
+  }
+
+  // e1RM de una serie (Epley). Solo 1–12 repeticiones y peso > 0. 1 rep = el peso tal cual.
+  function e1rmSerie(s) {
+    const w = num(s && s.w), r = num(s && s.r);
+    if (w === null || r === null || w <= 0 || r < 1 || r > 12) return null;
+    if (r === 1) return w;
+    return w * (1 + r / 30);
+  }
+
+  // e1RM del ejercicio: el mayor entre sus series válidas, cada serie con su propio peso y reps.
+  function e1rmEjercicio(series, tipo) {
+    if (tipo === 'tiempo') return null;
+    let best = null;
+    for (const s of series || []) {
+      const v = e1rmSerie(s);
+      if (v !== null && (best === null || v > best)) best = v;
+    }
+    return best;
+  }
+
+  // Grupo de variantes: quita "(deload)" y los sufijos TOP SET / BACK-OFF / TEST.
+  // Así se agrupan solo los 4 principales (barra / Smith); las mancuernas quedan aparte.
+  function grupo(nombre) {
+    return String(nombre || '')
+      .trim()
+      .replace(/\s*\(deload\)$/i, '')
+      .replace(/\s+—\s+(TOP SET|BACK-OFF|TEST\b.*)$/i, '')
+      .trim();
+  }
+
+  // Mejor marca de un conjunto de sesiones del mismo grupo.
+  // sesiones: [{ id, tipo, series:[...] }]. Devuelve { mejor, anterior } o null.
+  // mejor/anterior: { peso, reps, e1rm } (o { segundos } para ejercicios por tiempo).
+  function marcas(sesiones) {
+    const porSesion = [];
+    for (const ses of sesiones) {
+      const a = seriesAnotadas(ses.series);
+      if (ses.tipo === 'tiempo') {
+        const seg = a.reduce((m, s) => Math.max(m, s.r), 0);
+        if (seg > 0) porSesion.push({ id: ses.id, tiempo: true, segundos: seg });
+        continue;
+      }
+      const validas = a.filter((s) => s.r >= 1); // un intento fallido (0 reps) no es marca
+      if (!validas.length) continue;
+      let top = null;
+      for (const s of validas) {
+        if (top === null || s.w > top.w || (s.w === top.w && s.r > top.r)) top = s;
+      }
+      porSesion.push({ id: ses.id, peso: top.w, reps: top.r, e1rm: e1rmEjercicio(validas) });
+    }
+    if (!porSesion.length) return null;
+
+    if (porSesion.every((p) => p.tiempo)) {
+      const ord = porSesion.slice().sort((x, y) => y.segundos - x.segundos);
+      return { tiempo: true, mejor: { segundos: ord[0].segundos }, anterior: ord[1] ? { segundos: ord[1].segundos } : null };
+    }
+    const conPeso = porSesion.filter((p) => !p.tiempo);
+    const porPeso = conPeso.slice().sort((x, y) => y.peso - x.peso || y.reps - x.reps);
+    const conE = conPeso.filter((p) => p.e1rm !== null).sort((x, y) => y.e1rm - x.e1rm);
+    const mejor = { peso: porPeso[0].peso, reps: porPeso[0].reps, e1rm: conE[0] ? conE[0].e1rm : null };
+    // Marca anterior: lo mejor sin contar la sesión que tiene la marca actual.
+    const restoP = porPeso.filter((p) => p.id !== porPeso[0].id);
+    const restoE = conE.filter((p) => !conE[0] || p.id !== conE[0].id);
+    const anterior = restoP.length || restoE.length
+      ? { peso: restoP[0] ? restoP[0].peso : null, reps: restoP[0] ? restoP[0].reps : null, e1rm: restoE[0] ? restoE[0].e1rm : null }
+      : null;
+    return { tiempo: false, mejor, anterior };
+  }
+
+  function promedio(nums) {
+    const v = nums.filter((n) => typeof n === 'number' && !isNaN(n));
+    return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null;
+  }
+
+  global.Logica = { num, seriesAnotadas, serieAncla, sugerencia, e1rmSerie, e1rmEjercicio, grupo, marcas, promedio };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+'use strict';
+const L = window.Logica;
+const P = window.PROGRAMA;
+const KEY = 'registroPesas.v1';
+const DIAS = P.dias;
+const NOMBRE_DIA = { 'TORSO A': 'Torso A', 'PIERNA A': 'Pierna A', 'TORSO B': 'Torso B', 'PIERNA B': 'Pierna B' };
+
+// ---------- Estado persistente
+function estadoVacio() {
+  return { version: 1, ajustes: { semana: 1, dia: 'TORSO A', vista: 'hoy', ultimaExportacion: null },
+    registros: {}, perfil: { edad: '', altura: '', sexo: '' }, cuerpo: [], sueno: [], personalizados: [] };
+}
+function cargar() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return estadoVacio();
+    return normalizar(JSON.parse(raw));
+  } catch (e) { console.error(e); return estadoVacio(); }
+}
+function normalizar(d) {
+  const base = estadoVacio();
+  if (!d || typeof d !== 'object') throw new Error('Formato no válido');
+  return {
+    version: 1,
+    ajustes: Object.assign(base.ajustes, d.ajustes || {}),
+    registros: d.registros && typeof d.registros === 'object' ? d.registros : {},
+    perfil: Object.assign(base.perfil, d.perfil || {}),
+    cuerpo: Array.isArray(d.cuerpo) ? d.cuerpo : [],
+    sueno: Array.isArray(d.sueno) ? d.sueno : [],
+    personalizados: Array.isArray(d.personalizados) ? d.personalizados : [],
+  };
+}
+let S = cargar();
+let guardarFallo = false;
+function guardar() {
+  try { localStorage.setItem(KEY, JSON.stringify(S)); guardarFallo = false; }
+  catch (e) { if (!guardarFallo) toast('No se pudo guardar. Exporta tus datos.'); guardarFallo = true; }
+}
+
+// ---------- Utilidades
+const $ = (id) => document.getElementById(id);
+function el(tag, attrs, ...kids) {
+  const n = document.createElement(tag);
+  for (const k in attrs || {}) {
+    const v = attrs[k];
+    if (v === null || v === undefined || v === false) continue;
+    if (k === 'class') n.className = v;
+    else if (k.startsWith('on')) n.addEventListener(k.slice(2), v);
+    else if (k === 'text') n.textContent = v;
+    else n.setAttribute(k, v === true ? '' : v);
+  }
+  for (const c of kids.flat()) if (c !== null && c !== undefined && c !== false) n.append(c.nodeType ? c : document.createTextNode(c));
+  return n;
+}
+function hoyISO() { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); }
+function fechaCorta(iso) {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString('es', { day: 'numeric', month: 'short' });
+}
+function fmt(n) { if (n === null || n === undefined) return ''; return Number.isInteger(n) ? String(n) : String(Math.round(n * 10) / 10); }
+function parseNum(v) { if (v === null || v === undefined) return null; const t = String(v).trim().replace(',', '.'); if (t === '') return null; const n = Number(t); return isNaN(n) ? null : n; }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+let toastT;
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => (t.hidden = true), 2200); }
+
+// ---------- Programa
+function slots(semana, dia) { return (P.semanas[String(semana)] || {})[dia] || []; }
+function claveReg(semana, dia, idx) { return semana + '|' + dia + '|' + idx; }
+function ejercicioEfectivo(semana, dia, idx) {
+  const slot = slots(semana, dia)[idx];
+  const reg = S.registros[claveReg(semana, dia, idx)];
+  const nombre = reg && reg.nombre ? reg.nombre : slot.nombre;
+  return Object.assign({}, slot, { nombre, original: slot.nombre, cambiado: nombre !== slot.nombre });
+}
+function registro(semana, dia, idx, crear) {
+  const k = claveReg(semana, dia, idx);
+  if (!S.registros[k] && crear) {
+    const slot = slots(semana, dia)[idx];
+    S.registros[k] = { semana, dia, idx, original: slot.nombre, nombre: slot.nombre, series: [], hecho: false, nota: '', fecha: null, actualizado: null };
+  }
+  return S.registros[k];
+}
+function numFilas(ej, reg) { return ej.tipo === 'test' ? Math.max(ej.series, reg ? reg.series.length : 0) : ej.series; }
+function tieneDatos(reg) { return !!reg && L.seriesAnotadas(reg.series).length > 0; }
+function tipoDe(reg) {
+  const slot = slots(reg.semana, reg.dia)[reg.idx];
+  return slot ? slot.tipo : 'normal';
+}
+function ultimaVez(nombre, dia, excluir) {
+  const c = Object.entries(S.registros).filter(([k, r]) => k !== excluir && r.nombre === nombre && tieneDatos(r));
+  if (!c.length) return null;
+  const mismoDia = c.filter(([, r]) => r.dia === dia);
+  const lista = mismoDia.length ? mismoDia : c;
+  lista.sort(([, a], [, b]) => (b.fecha || '').localeCompare(a.fecha || '') || (b.actualizado || '').localeCompare(a.actualizado || ''));
+  return lista[0][1];
+}
+function nombresConocidos() {
+  const set = new Set();
+  for (const w of Object.keys(P.semanas)) for (const d of DIAS) for (const e of P.semanas[w][d]) set.add(e.nombre);
+  for (const n of S.personalizados) set.add(n);
+  return [...set].sort((a, b) => a.localeCompare(b, 'es'));
+}
+function faseDe(semana) {
+  if (semana <= 6) return 'Fase 1 · Hipertrofia';
+  if (semana === 7) return 'Semana de descarga';
+  if (semana <= 11) return 'Fase 2 · Fuerza';
+  if (semana === 12) return 'Semana de descarga';
+  if (semana <= 15) return 'Fase 3 · Powerbuilding';
+  return 'Semana 16 · Taper y test';
+}
+function textoSerie(s, tipo) {
+  const r = L.num(s.r);
+  if (r === null) return null;
+  if (tipo === 'tiempo') return r + ' s';
+  const w = L.num(s.w);
+  return (w === null || w === 0 ? 'PC' : fmt(w)) + '×' + r;
+}
+
+// ---------- HOY
+function renderSelectores() {
+  const sel = $('wk-sel');
+  if (!sel.options.length) for (let i = 1; i <= 16; i++) sel.append(el('option', { value: i, text: 'Semana ' + i }));
+  sel.value = S.ajustes.semana;
+  const days = $('days');
+  days.innerHTML = '';
+  for (const d of DIAS) {
+    days.append(el('button', { 'aria-pressed': String(S.ajustes.dia === d), onclick: () => { S.ajustes.dia = d; guardar(); renderHoy(); } }, NOMBRE_DIA[d]));
+  }
+  $('day-phase').textContent = faseDe(S.ajustes.semana);
+}
+function renderProgresoDia() {
+  const { semana, dia } = S.ajustes;
+  const n = slots(semana, dia).length;
+  let hechos = 0;
+  for (let i = 0; i < n; i++) { const r = S.registros[claveReg(semana, dia, i)]; if (r && r.hecho) hechos++; }
+  $('day-progress').textContent = hechos + ' de ' + n + ' terminados';
+}
+function renderHoy() {
+  renderSelectores();
+  const { semana, dia } = S.ajustes;
+  const list = $('hoy-list');
+  list.innerHTML = '';
+  const n = slots(semana, dia).length;
+  if (!n) list.append(el('p', { class: 'empty' }, 'No hay ejercicios para este día.'));
+  for (let i = 0; i < n; i++) list.append(tarjeta(semana, dia, i));
+  renderProgresoDia();
+}
+
+function tarjeta(semana, dia, idx) {
+  const ej = ejercicioEfectivo(semana, dia, idx);
+  const k = claveReg(semana, dia, idx);
+  const reg = S.registros[k];
+  const hecho = !!(reg && reg.hecho);
+  const card = el('div', { class: 'card' + (hecho ? ' done' : ''), id: 'card-' + idx });
+
+  // Encabezado
+  let meta;
+  if (ej.tipo === 'tiempo') meta = ej.series + ' series · ' + ej.min + '–' + ej.max + ' segundos · RIR ' + ej.rir;
+  else if (ej.tipo === 'test') meta = 'TEST · anota cada intento (fallido = 0 reps)';
+  else meta = ej.series + (ej.series === 1 ? ' serie' : ' series') + ' · ' + (ej.min === ej.max ? ej.min : ej.min + '–' + ej.max) + ' reps · RIR ' + ej.rir;
+  const head = el('div', { class: 'card-head' },
+    el('div', { class: 'n' }, hecho ? '✓' : String(idx + 1)),
+    el('div', { class: 'card-title' },
+      el('div', { class: 'name' }, ej.nombre),
+      ej.cambiado ? el('div', { class: 'swapped' }, 'En lugar de: ' + ej.original) : null,
+      el('div', { class: 'meta' }, meta),
+      ej.nota_rir ? el('div', { class: 'meta' }, 'Opcional: ' + ej.nota_rir) : null));
+  card.append(head);
+
+  // Lo de la última vez
+  const ult = ultimaVez(ej.nombre, dia, k);
+  if (ult) {
+    const tipoUlt = tipoDe(ult);
+    const partes = L.seriesAnotadas(ult.series).length ? ult.series.map((s) => textoSerie(s, tipoUlt)).filter(Boolean) : [];
+    card.append(el('div', { class: 'last' },
+      el('div', { class: 'txt' }, el('span', { class: 'muted' }, 'Última vez (S' + ult.semana + (ult.fecha ? ' · ' + fechaCorta(ult.fecha) : '') + '): '), el('b', {}, partes.join(', '))),
+      hecho ? null : el('button', { class: 'btn small copy', onclick: () => copiarUltima(semana, dia, idx, ult) }, 'Copiar pesos')));
+  }
+
+  if (hecho) {
+    const partes = reg.series.map((s) => textoSerie(s, ej.tipo)).filter(Boolean);
+    card.append(el('div', { class: 'summary' }, partes.length ? partes.join(', ') : 'Sin series anotadas'));
+    card.append(estado(ej, reg));
+    if (reg.nota) card.append(el('div', { class: 'summary' }, '📝 ' + reg.nota));
+    card.append(el('div', { class: 'actions' },
+      el('button', { class: 'btn grow', onclick: () => { reg.hecho = false; tocar(reg); guardar(); refrescarTarjeta(idx); renderProgresoDia(); } }, 'Editar')));
+    return card;
+  }
+
+  // Filas de series
+  const filas = numFilas(ej, reg);
+  const sets = el('div', { class: 'sets' });
+  sets.append(el('div', { class: 'colhead' }, el('span', {}, ''), el('span', { class: 'w' }, 'Peso (lb)'), el('span', {}, ej.tipo === 'tiempo' ? 'Seg.' : 'Reps')));
+  for (let i = 0; i < filas; i++) sets.append(filaSerie(semana, dia, idx, i, ej, ult));
+  card.append(sets);
+  if (ej.tipo === 'test') {
+    card.append(el('button', { class: 'btn small addset', onclick: () => {
+      const r = registro(semana, dia, idx, true);
+      while (r.series.length < filas) r.series.push({ w: null, r: null });
+      r.series.push({ w: null, r: null }); guardar(); refrescarTarjeta(idx);
+    } }, '+ intento'));
+  }
+
+  card.append(estado(ej, reg));
+
+  // Nota
+  const nota = el('textarea', { placeholder: 'Nota (opcional)', hidden: !(reg && reg.nota), oninput: (e) => { const r = registro(semana, dia, idx, true); r.nota = e.target.value; tocar(r); guardar(); } });
+  nota.value = reg && reg.nota ? reg.nota : '';
+  card.append(nota);
+
+  card.append(el('div', { class: 'actions' },
+    el('button', { class: 'btn small', onclick: () => { nota.hidden = !nota.hidden; if (!nota.hidden) nota.focus(); } }, 'Nota'),
+    el('button', { class: 'btn small', onclick: () => abrirCambio(semana, dia, idx) }, 'Cambiar'),
+    el('button', { class: 'btn small danger', onclick: () => vaciar(semana, dia, idx) }, 'Vaciar'),
+    el('button', { class: 'btn ok grow', onclick: () => { const r = registro(semana, dia, idx, true); r.hecho = true; tocar(r); guardar(); refrescarTarjeta(idx); renderProgresoDia(); } }, '✓ Terminado')));
+  return card;
+}
+
+function filaSerie(semana, dia, idx, i, ej, ult) {
+  const reg = S.registros[claveReg(semana, dia, idx)];
+  const s = (reg && reg.series[i]) || { w: null, r: null };
+  const us = ult && ult.series[i];
+  const wIn = el('input', { inputmode: 'decimal', enterkeyhint: 'next', autocomplete: 'off', 'aria-label': 'Peso serie ' + (i + 1), placeholder: us && L.num(us.w) !== null ? fmt(L.num(us.w)) : 'lb' });
+  const rIn = el('input', { inputmode: 'numeric', enterkeyhint: 'done', autocomplete: 'off', 'aria-label': (ej.tipo === 'tiempo' ? 'Segundos' : 'Repeticiones') + ' serie ' + (i + 1), placeholder: us && L.num(us.r) !== null ? String(us.r) : (ej.tipo === 'tiempo' ? 's' : 'reps') });
+  wIn.value = s.w === null || s.w === undefined ? '' : fmt(s.w);
+  rIn.value = s.r === null || s.r === undefined ? '' : String(s.r);
+  const set = (campo, valor) => {
+    const r = registro(semana, dia, idx, true);
+    while (r.series.length <= i) r.series.push({ w: null, r: null });
+    r.series[i][campo] = valor;
+    if (!r.fecha && valor !== null) r.fecha = hoyISO();
+    tocar(r); guardar(); actualizarEstado(idx);
+  };
+  wIn.addEventListener('input', () => set('w', parseNum(wIn.value)));
+  rIn.addEventListener('input', () => set('r', parseNum(rIn.value) === null ? null : Math.max(0, Math.round(parseNum(rIn.value)))));
+  const paso = (d) => {
+    let base = parseNum(wIn.value);
+    if (base === null) {
+      const r = S.registros[claveReg(semana, dia, idx)];
+      const prev = r && r.series.slice(0, i).reverse().find((x) => L.num(x.w) !== null);
+      base = prev ? L.num(prev.w) : (us && L.num(us.w) !== null ? L.num(us.w) : 0);
+      if (prev || (us && L.num(us.w) !== null)) d = 0; // primer toque: toma el peso de referencia
+    }
+    const v = Math.max(0, base + d);
+    wIn.value = fmt(v); set('w', v);
+  };
+  return el('div', { class: 'setrow' },
+    el('div', { class: 'lab' }, ej.tipo === 'test' ? 'I' + (i + 1) : 'S' + (i + 1)),
+    el('button', { class: 'pm', 'aria-label': 'Restar 5 lb', onclick: () => paso(-5) }, '−'),
+    wIn,
+    el('button', { class: 'pm', 'aria-label': 'Sumar 5 lb', onclick: () => paso(5) }, '+'),
+    rIn);
+}
+
+function estado(ej, reg) {
+  const box = el('div', { class: 'status', 'data-status': '' });
+  const sug = L.sugerencia(ej, reg ? reg.series.slice(0, numFilas(ej, reg)) : []);
+  if (sug) box.append(el('span', { class: 'pill ' + sug.codigo }, sug.texto));
+  const e = L.e1rmEjercicio(reg ? reg.series : [], ej.tipo);
+  if (e !== null) box.append(el('span', { class: 'e1rm' }, 'e1RM ', el('b', {}, fmt(e) + ' lb')));
+  return box;
+}
+function actualizarEstado(idx) {
+  const { semana, dia } = S.ajustes;
+  const card = $('card-' + idx);
+  if (!card) return;
+  const viejo = card.querySelector('[data-status]');
+  const ej = ejercicioEfectivo(semana, dia, idx);
+  viejo.replaceWith(estado(ej, S.registros[claveReg(semana, dia, idx)]));
+}
+function refrescarTarjeta(idx) {
+  const { semana, dia } = S.ajustes;
+  const card = $('card-' + idx);
+  if (card) card.replaceWith(tarjeta(semana, dia, idx));
+}
+function tocar(r) { r.actualizado = new Date().toISOString(); }
+
+function copiarUltima(semana, dia, idx, ult) {
+  const ej = ejercicioEfectivo(semana, dia, idx);
+  const r = registro(semana, dia, idx, true);
+  const filas = numFilas(ej, r);
+  let ultimoPeso = null;
+  for (let i = 0; i < filas; i++) {
+    while (r.series.length <= i) r.series.push({ w: null, r: null });
+    const u = ult.series[i];
+    if (u && L.num(u.w) !== null) ultimoPeso = L.num(u.w);
+    if (ultimoPeso !== null) r.series[i].w = ultimoPeso;
+  }
+  tocar(r); guardar(); refrescarTarjeta(idx);
+  toast('Pesos copiados. Las reps de la última vez se ven en gris.');
+}
+function vaciar(semana, dia, idx) {
+  const k = claveReg(semana, dia, idx);
+  const r = S.registros[k];
+  if (!r || (!tieneDatos(r) && !r.series.some((s) => L.num(s.w) !== null) && !r.nota && !r.hecho && r.nombre === r.original)) { toast('No hay nada que borrar'); return; }
+  if (!confirm('¿Borrar las series y la nota de este ejercicio?')) return;
+  const nombre = r.nombre;
+  r.series = []; r.nota = ''; r.hecho = false; r.fecha = null; tocar(r);
+  if (nombre === r.original) delete S.registros[k];
+  guardar(); refrescarTarjeta(idx); renderProgresoDia();
+}
+
+// ---------- Cambiar ejercicio
+let cambio = null;
+function abrirCambio(semana, dia, idx) {
+  cambio = { semana, dia, idx };
+  const ej = ejercicioEfectivo(semana, dia, idx);
+  $('swap-title').textContent = 'Cambiar: ' + ej.nombre;
+  $('swap-orig').hidden = !ej.cambiado;
+  $('swap-q').value = '';
+  pintarOpciones();
+  $('swap').hidden = false;
+}
+function pintarOpciones() {
+  const q = $('swap-q').value.trim();
+  const ql = q.toLocaleLowerCase('es');
+  const box = $('swap-opts');
+  box.innerHTML = '';
+  const nombres = nombresConocidos().filter((n) => !ql || n.toLocaleLowerCase('es').includes(ql));
+  if (q && !nombresConocidos().some((n) => n.toLocaleLowerCase('es') === ql)) {
+    box.append(el('button', { class: 'opt', style: 'color:var(--accent);font-weight:700', onclick: () => elegir(q, true) }, '+ Usar nuevo: “' + q + '”'));
+  }
+  for (const n of nombres) box.append(el('button', { class: 'opt', onclick: () => elegir(n, false) }, n));
+}
+function elegir(nombre, nuevo) {
+  const { semana, dia, idx } = cambio;
+  const r = registro(semana, dia, idx, true);
+  if (nuevo && !S.personalizados.includes(nombre)) S.personalizados.push(nombre);
+  r.nombre = nombre; tocar(r); guardar();
+  cerrarCambio(); refrescarTarjeta(idx);
+}
+function cerrarCambio() { $('swap').hidden = true; cambio = null; }
+$('swap-q').addEventListener('input', pintarOpciones);
+$('swap-cerrar').addEventListener('click', cerrarCambio);
+$('swap').addEventListener('click', (e) => { if (e.target.id === 'swap') cerrarCambio(); });
+$('swap-orig').addEventListener('click', () => { const r = registro(cambio.semana, cambio.dia, cambio.idx, true); elegir(r.original, false); });
+
+// ---------- PROGRESO
+function renderProgreso() {
+  const box = $('prog-list');
+  box.innerHTML = '';
+  const orden = [];
+  const vistos = new Set();
+  for (let w = 1; w <= 16; w++) for (const d of DIAS) for (const e of slots(w, d)) {
+    const g = L.grupo(e.nombre); if (!vistos.has(g)) { vistos.add(g); orden.push(g); }
+  }
+  const grupos = {};
+  for (const [k, r] of Object.entries(S.registros)) {
+    if (!tieneDatos(r)) continue;
+    const g = L.grupo(r.nombre);
+    (grupos[g] = grupos[g] || { sesiones: [], variantes: new Set() });
+    grupos[g].sesiones.push({ id: k, tipo: tipoDe(r), series: r.series });
+    grupos[g].variantes.add(r.nombre);
+  }
+  const claves = Object.keys(grupos).sort((a, b) => {
+    const ia = orden.indexOf(a), ib = orden.indexOf(b);
+    return (ia < 0 ? 1e9 : ia) - (ib < 0 ? 1e9 : ib) || a.localeCompare(b, 'es');
+  });
+  if (!claves.length) { box.append(el('p', { class: 'empty' }, 'Aún no hay registros. Cuando anotes series en Hoy, aquí verás tus mejores marcas.')); return; }
+  for (const g of claves) {
+    const m = L.marcas(grupos[g].sesiones);
+    if (!m) continue;
+    const vars = [...grupos[g].variantes].filter((v) => v !== g).map((v) => v.replace(g, '').replace(/^\s*—\s*/, '').trim() || v);
+    const card = el('div', { class: 'prog' }, el('div', { class: 'name' }, g));
+    if (vars.length) card.append(el('div', { class: 'vars' }, 'Incluye: ' + vars.join(', ')));
+    if (m.tiempo) {
+      card.append(el('div', { class: 'row' }, el('span', {}, 'Mejor'), el('span', { class: 'big' }, m.mejor.segundos + ' s')));
+      card.append(el('div', { class: 'row' }, el('span', {}, 'Anterior'), el('span', {}, m.anterior ? m.anterior.segundos + ' s' : '—')));
+    } else {
+      const pw = (p) => (p.peso === null ? '—' : (p.peso === 0 ? 'PC' : fmt(p.peso) + ' lb') + ' × ' + p.reps);
+      card.append(el('div', { class: 'row' }, el('span', {}, 'Mejor peso'), el('span', { class: 'big' }, pw(m.mejor))));
+      card.append(el('div', { class: 'row' }, el('span', {}, 'Mejor e1RM'), el('span', { class: 'big' }, m.mejor.e1rm !== null ? fmt(m.mejor.e1rm) + ' lb' : '—')));
+      card.append(el('div', { class: 'row' }, el('span', {}, 'Marca anterior'),
+        el('span', {}, m.anterior ? pw(m.anterior) + (m.anterior.e1rm !== null ? ' · e1RM ' + fmt(m.anterior.e1rm) : '') : '—')));
+    }
+    box.append(card);
+  }
+}
+
+// ---------- YO
+function renderYo() {
+  $('p-edad').value = S.perfil.edad || '';
+  $('p-altura').value = S.perfil.altura || '';
+  $('p-sexo').value = S.perfil.sexo || '';
+  if (!editCuerpo) { $('c-fecha').value = hoyISO(); }
+  if (!editSueno) { $('s-fecha').value = hoyISO(); }
+  pintarCuerpo(); pintarSueno(); pintarExport();
+}
+for (const [id, campo] of [['p-edad', 'edad'], ['p-altura', 'altura'], ['p-sexo', 'sexo']]) {
+  $(id).addEventListener(id === 'p-sexo' ? 'change' : 'input', (e) => { S.perfil[campo] = e.target.value.trim(); guardar(); });
+}
+
+let editCuerpo = null;
+function pintarCuerpo() {
+  const box = $('c-list'); box.innerHTML = '';
+  const lista = S.cuerpo.slice().sort((a, b) => b.fecha.localeCompare(a.fecha));
+  if (!lista.length) { box.append(el('div', { class: 'empty' }, 'Sin registros todavía.')); return; }
+  for (const c of lista) {
+    const txt = [c.peso !== null && c.peso !== undefined ? fmt(c.peso) + ' lb' : null, c.cintura !== null && c.cintura !== undefined ? fmt(c.cintura) + ' cm cintura' : null].filter(Boolean).join(' · ');
+    box.append(el('div', { class: 'item' },
+      el('div', { class: 'grow' }, el('div', { style: 'font-weight:600' }, txt), el('div', { class: 'small muted' }, fechaCorta(c.fecha))),
+      el('button', { class: 'btn small', onclick: () => { editCuerpo = c.id; $('c-fecha').value = c.fecha; $('c-peso').value = c.peso ?? ''; $('c-cintura').value = c.cintura ?? ''; $('c-guardar').textContent = 'Actualizar'; $('c-cancelar').hidden = false; $('c-peso').focus(); } }, 'Editar'),
+      el('button', { class: 'btn small danger', onclick: () => { if (confirm('¿Borrar este registro?')) { S.cuerpo = S.cuerpo.filter((x) => x.id !== c.id); guardar(); pintarCuerpo(); } } }, 'Borrar')));
+  }
+}
+function limpiarCuerpo() { editCuerpo = null; $('c-peso').value = ''; $('c-cintura').value = ''; $('c-fecha').value = hoyISO(); $('c-guardar').textContent = 'Guardar'; $('c-cancelar').hidden = true; }
+$('c-cancelar').addEventListener('click', limpiarCuerpo);
+$('c-guardar').addEventListener('click', () => {
+  const fecha = $('c-fecha').value || hoyISO();
+  const peso = parseNum($('c-peso').value), cintura = parseNum($('c-cintura').value);
+  if (peso === null && cintura === null) { toast('Escribe el peso o la cintura'); return; }
+  if (editCuerpo) Object.assign(S.cuerpo.find((x) => x.id === editCuerpo), { fecha, peso, cintura });
+  else S.cuerpo.push({ id: uid(), fecha, peso, cintura });
+  guardar(); limpiarCuerpo(); pintarCuerpo(); toast('Guardado');
+});
+
+let editSueno = null;
+function pintarSueno() {
+  const box = $('s-list'); box.innerHTML = '';
+  const hoy = hoyISO();
+  const d = new Date(); d.setDate(d.getDate() - 6); d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  const desde = d.toISOString().slice(0, 10);
+  const prom = L.promedio(S.sueno.filter((s) => s.fecha >= desde && s.fecha <= hoy).map((s) => s.horas));
+  $('s-avg').textContent = prom === null ? '—' : fmt(prom) + ' h';
+  const lista = S.sueno.slice().sort((a, b) => b.fecha.localeCompare(a.fecha)).slice(0, 21);
+  if (!lista.length) { box.append(el('div', { class: 'empty' }, 'Sin registros. Es opcional.')); return; }
+  for (const s of lista) {
+    box.append(el('div', { class: 'item' },
+      el('div', { class: 'grow' }, el('span', { style: 'font-weight:600' }, fmt(s.horas) + ' h'), el('span', { class: 'small muted' }, '  ' + fechaCorta(s.fecha))),
+      el('button', { class: 'btn small', onclick: () => { editSueno = s.id; $('s-fecha').value = s.fecha; $('s-horas').value = s.horas; $('s-guardar').textContent = 'Actualizar'; $('s-cancelar').hidden = false; $('s-horas').focus(); } }, 'Editar'),
+      el('button', { class: 'btn small danger', onclick: () => { if (confirm('¿Borrar esta noche?')) { S.sueno = S.sueno.filter((x) => x.id !== s.id); guardar(); pintarSueno(); } } }, 'Borrar')));
+  }
+}
+function limpiarSueno() { editSueno = null; $('s-horas').value = ''; $('s-fecha').value = hoyISO(); $('s-guardar').textContent = 'Guardar'; $('s-cancelar').hidden = true; }
+$('s-cancelar').addEventListener('click', limpiarSueno);
+$('s-guardar').addEventListener('click', () => {
+  const fecha = $('s-fecha').value || hoyISO();
+  const horas = parseNum($('s-horas').value);
+  if (horas === null || horas < 0 || horas > 24) { toast('Escribe las horas (0 a 24)'); return; }
+  // Un solo número por día: si ya hay uno en esa fecha, se reemplaza.
+  S.sueno = S.sueno.filter((x) => x.id === editSueno || x.fecha !== fecha);
+  if (editSueno) Object.assign(S.sueno.find((x) => x.id === editSueno), { fecha, horas });
+  else S.sueno.push({ id: uid(), fecha, horas });
+  guardar(); limpiarSueno(); pintarSueno(); toast('Guardado');
+});
+
+// ---------- Exportar / importar
+function pintarExport() {
+  const u = S.ajustes.ultimaExportacion;
+  $('ultima-export').textContent = u ? 'Última exportación: ' + new Date(u).toLocaleString('es') : 'Aún no has exportado.';
+}
+$('exportar').addEventListener('click', async () => {
+  const datos = JSON.stringify(Object.assign({ app: 'registro-pesas', exportado: new Date().toISOString() }, S), null, 1);
+  const nombre = 'registro-pesas-' + hoyISO() + '.json';
+  const blob = new Blob([datos], { type: 'application/json' });
+  let hecho = false;
+  try {
+    const file = new File([blob], nombre, { type: 'application/json' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: nombre }); hecho = true; }
+  } catch (e) { if (e && e.name === 'AbortError') return; }
+  if (!hecho) {
+    const a = el('a', { href: URL.createObjectURL(blob), download: nombre });
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  }
+  S.ajustes.ultimaExportacion = new Date().toISOString(); guardar(); pintarExport();
+});
+$('importar').addEventListener('click', () => $('importar-file').click());
+$('importar-file').addEventListener('change', async (e) => {
+  const f = e.target.files[0]; e.target.value = '';
+  if (!f) return;
+  try {
+    const d = JSON.parse(await f.text());
+    if (d.app !== 'registro-pesas' && !d.registros) throw new Error('no es un archivo de esta página');
+    const nuevo = normalizar(d);
+    const n = Object.values(nuevo.registros).filter(tieneDatos).length;
+    if (!confirm('Esto reemplaza TODOS los datos de este teléfono por los del archivo (' + n + ' ejercicios con series, ' + nuevo.cuerpo.length + ' pesajes, ' + nuevo.sueno.length + ' noches). ¿Continuar?')) return;
+    S = nuevo; guardar(); mostrar(S.ajustes.vista || 'hoy'); toast('Datos importados');
+  } catch (err) { alert('No se pudo importar: ' + err.message); }
+});
+
+// ---------- Navegación
+function mostrar(v) {
+  S.ajustes.vista = v; guardar();
+  for (const b of document.querySelectorAll('.tabs button')) b.setAttribute('aria-pressed', String(b.dataset.view === v));
+  for (const id of ['hoy', 'progreso', 'yo']) $('v-' + id).hidden = id !== v;
+  if (v === 'hoy') renderHoy();
+  if (v === 'progreso') renderProgreso();
+  if (v === 'yo') renderYo();
+  window.scrollTo(0, 0);
+}
+for (const b of document.querySelectorAll('.tabs button')) b.addEventListener('click', () => mostrar(b.dataset.view));
+$('wk-sel').addEventListener('change', (e) => { S.ajustes.semana = Number(e.target.value); guardar(); renderHoy(); });
+$('wk-prev').addEventListener('click', () => { if (S.ajustes.semana > 1) { S.ajustes.semana--; guardar(); renderHoy(); } });
+$('wk-next').addEventListener('click', () => { if (S.ajustes.semana < 16) { S.ajustes.semana++; guardar(); renderHoy(); } });
+
+mostrar(S.ajustes.vista || 'hoy');
+
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
